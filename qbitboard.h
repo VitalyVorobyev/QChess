@@ -17,6 +17,8 @@ public:
 
   U64 FirstOne(void);
   U64 Snoob(void);
+  QBitBoard operator |(const QBitBoard& qbb);
+  QBitBoard operator &(const QBitBoard& qbb);
 private:
   U64 m_bits;
 };

@@ -25,10 +25,11 @@ private:
 
   QBitBoard boccupancy;
   QBitBoard woccupancy;
+  QBitBoard occupancy;
 
-  void SetBOcc();
-  void SetWOcc();
-  void SetOcc();
+  void SetBOcc(void);
+  void SetWOcc(void);
+  void SetOcc(void);
 
   bool turnFlag;// 0 -> white, 1 -> black
 };
