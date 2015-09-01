@@ -1,6 +1,10 @@
 #ifndef QBITBOARD_H
 #define QBITBOARD_H
 
+#include <iostream>
+
+using namespace std;
+
 typedef unsigned long long U64;
 typedef unsigned short U16;
 

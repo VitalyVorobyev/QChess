@@ -5,8 +5,9 @@
 
 class QPosition{
 public:
-  QPosition();
+  QPosition(void);
   int MakeMove(const QBitBoard& from,const QBitBoard& to,const int ind);
+  void PrintLookUpTables(void) const;
 
 private:
   QBitBoard bpowns;
@@ -30,6 +31,11 @@ private:
   void SetBOcc(void);
   void SetWOcc(void);
   void SetOcc(void);
+
+  QBitBoard KingMovement(const U64 &l, const U64& own_side);
+  QBitBoard KnightMovement(const U64& king_location, const U64& own_side);
+  QBitBoard WhitePawnMovement(const U64& location);
+  QBitBoard BlackPawnMovement(const U64& location);
 
   bool turnFlag;// 0 -> white, 1 -> black
 };
