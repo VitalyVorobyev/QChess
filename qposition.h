@@ -7,7 +7,6 @@ class QPosition{
 public:
   QPosition(void);
   int MakeMove(const QBitBoard& from,const QBitBoard& to,const int ind);
-  void PrintLookUpTables(void) const;
 
 private:
   QBitBoard bpowns;
