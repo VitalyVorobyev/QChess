@@ -11,17 +11,21 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = QChess
 TEMPLATE = app
 
+CONFIG += c++11
+QMAKE_CXXFLAGS += -std=c++11
 
 SOURCES += main.cpp\
         mainwindow.cpp \
     qposition.cpp \
     qbitboard.cpp \
-    qmagichash.cpp
+    qmagichash.cpp \
+    qmove.cpp
 
 HEADERS  += mainwindow.h \
     qposition.h \
     qbitboard.h \
     qmagichash.h \
-    qlookup.h
+    qlookup.h \
+    qmove.h
 
 FORMS    += mainwindow.ui
