@@ -6,7 +6,10 @@
 int main(int argc, char *argv[]){
   QPosition pos;
   pos.SetInitialPosition();
-  pos.PrintAttacks();
+//  pos.PrintAttacks();
+  pos.FindWMoves();
+  vector<QMove> moves = pos.Moves();
+  for(int i=0; i<(int)moves.size(); i++) moves[i].Print();
 
 //  QMagicHash::FillMagic();
 //  cout << "Hello, Qt!" << endl;

@@ -39,11 +39,11 @@ void QPosition::SetInitialPosition(void){
 }
 
 void QPosition::SetBOcc(void){
-  boccupancy = bpowns() | bknights() | bbishops() | brooks() | bquins() | bking();
+  boccupancy = bpawns() | bknights() | bbishops() | brooks() | bqueens() | bking();
 }
 
 void QPosition::SetWOcc(void){
-  woccupancy = wpowns() | wknights() | wbishops() | wrooks() | wquins() | wking();
+  woccupancy = wpawns() | wknights() | wbishops() | wrooks() | wqueens() | wking();
 }
 
 void QPosition::SetOcc(void){
@@ -192,11 +192,56 @@ int QPosition::MakeMove(const QMove& move){
   return 0;
 }
 
-int QPosition::FindMoves(void){
-  QBitBoard wpmov(WhitePawnMovement(wpowns()));
-  QBitBoard wp(wpowns());
+int QPosition::FindWMoves(void){
+  // * Pawns * //
+  QBitBoard wpmov(WhitePawnMovement(wpawns()));
   const int nwp = wpmov.PopCount();
   for(int i=0; i<nwp; i++){
-    const int loc = wpieces[0]
+    const int loc = wpmov.PopFirst();
+    U64 from = soutOne(Piece[loc]);
+    if(from & wpawns()) moves.push_back(QMove(from,Piece[loc],0,false,-1));
+    else                moves.push_back(QMove(soutOne(from),Piece[loc],0,false,-1));
   }
+
+  // * Knights * //
+  QBitBoard wkn(wknights());
+  const int nwkn = wkn.PopCount();
+  for(int i=0; i<nwkn; i++){
+    const int from_loc = wkn.PopFirst();
+    QBitBoard wknmov(KnightMovement(Piece[from_loc],boccupancy));
+    const int nmov = wknmov.PopCount();
+    for(int j=0; j<nmov; j++){
+      const int to_loc = wknmov.PopFirst();
+      const int cpiace = CheckBPiece(Piece[to_loc]);
+      moves.push_back(QMove(Piece[from_loc],Piece[to_loc],2,false,cpiace));
+    }
+  }
+
+  // * Bishops * //
+
+  return moves.size();
+}
+
+int QPosition::CheckWPiece(const U64& loc){
+  if(loc & woccupancy){
+    if(loc & wpawns())   return 0;
+    if(loc & wknights()) return 1;
+    if(loc & wbishops()) return 2;
+    if(loc & wrooks())   return 3;
+    if(loc & wqueens())  return 4;
+    if(loc & wking())    return 5;
+  }
+  return -1;
+}
+
+int QPosition::CheckBPiece(const U64& loc){
+  if(loc & boccupancy){
+    if(loc & bpawns())   return 0;
+    if(loc & bknights()) return 1;
+    if(loc & bbishops()) return 2;
+    if(loc & brooks())   return 3;
+    if(loc & bqueens())  return 4;
+    if(loc & bking())    return 5;
+  }
+  return -1;
 }
