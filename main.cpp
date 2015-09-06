@@ -6,8 +6,9 @@
 int main(int argc, char *argv[]){
   QPosition pos;
   pos.SetInitialPosition();
-//  pos.PrintAttacks();
-  pos.FindWMoves();
+  cout << "Size of QPosition: " << sizeof(QPosition) << endl;
+  //  pos.PrintAttacks();
+  pos.FindMoves();
   vector<QMove> moves = pos.Moves();
   for(int i=0; i<(int)moves.size(); i++) moves[i].Print();
 

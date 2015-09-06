@@ -19,13 +19,15 @@ SOURCES += main.cpp\
     qposition.cpp \
     qbitboard.cpp \
     qmagichash.cpp \
-    qmove.cpp
+    qmove.cpp \
+    qalphabeta.cpp
 
 HEADERS  += mainwindow.h \
     qposition.h \
     qbitboard.h \
     qmagichash.h \
     qlookup.h \
-    qmove.h
+    qmove.h \
+    qalphabeta.h
 
 FORMS    += mainwindow.ui

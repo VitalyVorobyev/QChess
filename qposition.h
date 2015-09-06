@@ -11,10 +11,14 @@ class QPosition{
 public:
   QPosition(void);
   void SetInitialPosition(void);
+  void SetTurnFlag(const bool b){turnFlag = b;}
   int MakeMove(const QMove& move);
-  int FindWMoves(void);
+  int UnmakeMove(const QMove& move);
+
+  vector<QMove> &FindMoves(void);
 
   vector<QMove> Moves(void) const {return moves;}
+  vector<int> Captures(void) const {return cap_moves;}
 
   U64 WKingMov(void) const {return KingMovement(wking(),woccupancy);}
   U64 BKingMov(void) const {return KingMovement(bking(),boccupancy);}
@@ -39,6 +43,7 @@ public:
   U64 GetOcc(void)  const {return occupancy;}
 
   void PrintAttacks(void) const;
+  double Evaluate(void) const;
 
 private:
   U64 KingMovement(const U64 &l, const U64& own_side) const;
@@ -48,6 +53,14 @@ private:
   U64 RookMovement(const U64& location,const U64& own_side) const;
   U64 BishopMovement(const U64& location,const U64& own_side) const;
   U64 QueenMovement(const U64& location,const U64& own_side) const;
+
+  int FindWPawnsMoves(void);
+  int FindBPawnsMoves(void);
+  int FindKnightMoves(void);
+  int FindBishopMoves(void);
+  int FindRookMoves(void);
+  int FindQueenMoves(void);
+  int FindKingMoves(void);
 
   U64 bpieces[6];
   U64 wpieces[6];
@@ -84,6 +97,7 @@ private:
 
   static QMagicHash magic;
   vector<QMove> moves;
+  vector<int> cap_moves;
 };
 
 #endif // QPOSITION_H

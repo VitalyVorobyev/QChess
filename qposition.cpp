@@ -192,34 +192,157 @@ int QPosition::MakeMove(const QMove& move){
   return 0;
 }
 
-int QPosition::FindWMoves(void){
-  // * Pawns * //
+int QPosition::UnmakeMove(const QMove& move){
+  return 0;
+}
+
+int QPosition::FindWPawnsMoves(void){
   QBitBoard wpmov(WhitePawnMovement(wpawns()));
   const int nwp = wpmov.PopCount();
   for(int i=0; i<nwp; i++){
     const int loc = wpmov.PopFirst();
-    U64 from = soutOne(Piece[loc]);
-    if(from & wpawns()) moves.push_back(QMove(from,Piece[loc],0,false,-1));
-    else                moves.push_back(QMove(soutOne(from),Piece[loc],0,false,-1));
-  }
-
-  // * Knights * //
-  QBitBoard wkn(wknights());
-  const int nwkn = wkn.PopCount();
-  for(int i=0; i<nwkn; i++){
-    const int from_loc = wkn.PopFirst();
-    QBitBoard wknmov(KnightMovement(Piece[from_loc],boccupancy));
-    const int nmov = wknmov.PopCount();
-    for(int j=0; j<nmov; j++){
-      const int to_loc = wknmov.PopFirst();
-      const int cpiace = CheckBPiece(Piece[to_loc]);
-      moves.push_back(QMove(Piece[from_loc],Piece[to_loc],2,false,cpiace));
+    const U64& to = Piece[loc];
+    const int cpiece = CheckBPiece(to);
+    if(cpiece == -1){
+      const U64 from = soutOne(to);// forward movements
+      if(from & wpawns()) moves.push_back(QMove(from,to,0,false,cpiece));
+      else                moves.push_back(QMove(soutOne(from),to,0,false,cpiece));
+    } else{
+      const U64 fromSoEa = soEaOne(to);
+      if(fromSoEa & wpawns()){
+        moves.push_back(QMove(fromSoEa,to,0,false,cpiece));
+        cap_moves.push_back(moves.size()-1);
+      }
+      const U64 fromSoWe = soWeOne(to);
+      if(fromSoWe & wpawns()){
+        moves.push_back(QMove(fromSoWe,to,0,false,cpiece));
+        cap_moves.push_back(moves.size()-1);
+      }
     }
   }
-
-  // * Bishops * //
-
   return moves.size();
+}
+
+int QPosition::FindBPawnsMoves(void){
+  QBitBoard bpmov(BlackPawnMovement(bpawns()));
+  const int nbp = bpmov.PopCount();
+  for(int i=0; i<nbp; i++){
+    const int loc = bpmov.PopFirst();
+    const U64& to = Piece[loc];
+    const int cpiece = CheckWPiece(to);
+    if(cpiece == -1){
+      const U64 from = nortOne(to);// forward movements
+      if(from & bpawns()) moves.push_back(QMove(from,to,0,true,cpiece));
+      else                moves.push_back(QMove(nortOne(from),to,0,true,cpiece));
+    } else{
+      const U64 fromNoEa = noEaOne(to);
+      if(fromNoEa & bpawns()){
+        moves.push_back(QMove(fromNoEa,to,0,true,cpiece));
+        cap_moves.push_back(moves.size()-1);
+      }
+      const U64 fromNoWe = noWeOne(to);
+      if(fromNoWe & bpawns()){
+        moves.push_back(QMove(fromNoWe,to,0,true,cpiece));
+        cap_moves.push_back(moves.size()-1);
+      }
+    }
+  }
+  return moves.size();
+}
+
+int QPosition::FindKnightMoves(void){
+  QBitBoard kn(turnFlag ? bknights() : wknights());
+  const int nkn = kn.PopCount();
+  for(int i=0; i<nkn; i++){
+    const int from_loc = kn.PopFirst();
+    const U64& occ = turnFlag ? boccupancy : woccupancy;
+    QBitBoard knmov(KnightMovement(Piece[from_loc],occ));
+    const int nmov = knmov.PopCount();
+    for(int j=0; j<nmov; j++){
+      const int to_loc = knmov.PopFirst();
+      const int cpiece = turnFlag ? CheckWPiece(Piece[to_loc]) : CheckBPiece(Piece[to_loc]);
+      moves.push_back(QMove(Piece[from_loc],Piece[to_loc],1,turnFlag,cpiece));
+      if(cpiece != -1) cap_moves.push_back(moves.size()-1);
+    }
+  }
+  return moves.size();
+}
+
+int QPosition::FindBishopMoves(void){
+  QBitBoard b(turnFlag ? bbishops() : wbishops());
+  const int nb = b.PopCount();
+  for(int i=0; i<nb; i++){
+    const int from_loc = b.PopFirst();
+    const U64& occ = turnFlag ? boccupancy : woccupancy;
+    QBitBoard bmov(BishopMovement(Piece[from_loc],occ));
+    const int nbmov = bmov.PopCount();
+    for(int j=0; j<nbmov; j++){
+      const int to_loc = bmov.PopFirst();
+      const int cpiece = turnFlag ? CheckWPiece(Piece[to_loc]) : CheckBPiece(Piece[to_loc]);
+      moves.push_back(QMove(Piece[from_loc],Piece[to_loc],2,turnFlag,cpiece));
+      if(cpiece != -1) cap_moves.push_back(moves.size()-1);
+    }
+  }
+  return moves.size();
+}
+
+int QPosition::FindRookMoves(void){
+  QBitBoard r(turnFlag ? brooks() : wrooks());
+  const int nr = r.PopCount();
+  for(int i=0; i<nr; i++){
+    const int from_loc = r.PopFirst();
+    const U64& occ = turnFlag ? boccupancy : woccupancy;
+    QBitBoard rmov(RookMovement(Piece[from_loc],occ));
+    const int nrmov = rmov.PopCount();
+    for(int j=0; j<nrmov; j++){
+      const int to_loc = rmov.PopFirst();
+      const int cpiece = turnFlag ? CheckWPiece(Piece[to_loc]) : CheckBPiece(Piece[to_loc]);
+      moves.push_back(QMove(Piece[from_loc],Piece[to_loc],3,turnFlag,cpiece));
+      if(cpiece != -1) cap_moves.push_back(moves.size()-1);
+    }
+  }
+  return moves.size();
+}
+
+int QPosition::FindQueenMoves(void){
+  QBitBoard q(turnFlag ? bqueens() : wqueens());
+  const int nq = q.PopCount();
+  for(int i=0; i<nq; i++){
+    const int from_loc = q.PopFirst();
+    const U64& occ = turnFlag ? boccupancy : woccupancy;
+    QBitBoard qmov(RookMovement(Piece[from_loc],occ));
+    const int nqmov = qmov.PopCount();
+    for(int j=0; j<nqmov; j++){
+      const int to_loc = qmov.PopFirst();
+      const int cpiece = turnFlag ? CheckWPiece(Piece[to_loc]) : CheckBPiece(Piece[to_loc]);
+      moves.push_back(QMove(Piece[from_loc],Piece[to_loc],4,turnFlag,cpiece));
+      if(cpiece != -1) cap_moves.push_back(moves.size()-1);
+    }
+  }
+  return moves.size();
+}
+
+int QPosition::FindKingMoves(void){
+  const U64& k = turnFlag ? bking() : wking();
+  const U64& occ = turnFlag ? boccupancy : woccupancy;
+  QBitBoard kmov(KingMovement(k,occ));
+  const int nkmov = kmov.PopCount();
+  for(int j=0; j<nkmov; j++){
+    const int to_loc = kmov.PopFirst();
+    const int cpiece = turnFlag ? CheckWPiece(Piece[to_loc]) : CheckBPiece(Piece[to_loc]);
+    moves.push_back(QMove(k,Piece[to_loc],5,turnFlag,cpiece));
+    if(cpiece != -1) cap_moves.push_back(moves.size()-1);
+  }
+  return moves.size();
+}
+
+vector<QMove>& QPosition::FindMoves(void){
+  moves.clear(); cap_moves.clear();
+  turnFlag ? FindBPawnsMoves() : FindWPawnsMoves();
+  FindKnightMoves();
+  FindBishopMoves();
+
+  return moves;
 }
 
 int QPosition::CheckWPiece(const U64& loc){
@@ -244,4 +367,19 @@ int QPosition::CheckBPiece(const U64& loc){
     if(loc & bking())    return 5;
   }
   return -1;
+}
+
+const float values[5] = {1.,3.,3.,5.,10.};
+double QPosition::Evaluate(void) const{
+  double eval = 0;
+  QBitBoard wbb[5];
+  QBitBoard bbb[5];
+
+  for(int i=0; i<5; i++){
+    wbb[i] = QBitBoard(wpieces[i]);
+    wbb[i] = QBitBoard(wpieces[i]);
+    eval  += values[i]*(wbb[i].PopCount()-bbb[i].PopCount());
+  }
+
+  return eval;
 }
